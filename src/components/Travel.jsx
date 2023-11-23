@@ -9,7 +9,7 @@ export default function Travel({ data, origin, destination, price, availability 
                 <p className="text-gray-700 text-base"><b>Destination: </b>{destination}</p>
                 <p className="text-gray-700 text-base"><b>Price: </b>${price}</p>
                 <p className="text-gray-700 text-base"><b>Availability: </b>{availability}</p>
-                <button type="button" className="px-4 py-2 mt-6 text-sm font-bold font-sans text-white transition-all duration-150 bg-btn-primary rounded shadow outline-none hover:shadow-md hover:bg-btn-hover ease">Go!</button>
+                <button type="button" className="px-4 py-2 mt-6 text-sm font-bold font-sans text-white transition-all duration-150 bg-btn-primary rounded shadow outline-none hover:shadow-md hover:bg-btn-hover ease">More</button>
             </div>
         </div>
     )
