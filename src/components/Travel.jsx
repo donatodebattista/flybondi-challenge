@@ -1,16 +1,45 @@
-export default function Travel({ data, origin, destination, price, availability }){
-    
-    return(
-        <div className="m-auto bg-white max-w-sm rounded overflow-hidden shadow-lg">
-            <div className="bg-bgTravelCard px-6 py-4">
-                <p className="font-bold text-xl mb-2">Travel</p>
-                <p className="text-gray-700 text-base"><b>Date: </b>{data}</p>
-                <p className="text-gray-700 text-base"><b>Origin: </b>{origin}</p>
-                <p className="text-gray-700 text-base"><b>Destination: </b>{destination}</p>
-                <p className="text-gray-700 text-base"><b>Price: </b>${price}</p>
-                <p className="text-gray-700 text-base"><b>Availability: </b>{availability}</p>
-                <button type="button" className="px-4 py-2 mt-6 text-sm font-bold font-sans text-white transition-all duration-150 bg-btn-primary rounded shadow outline-none hover:shadow-md hover:bg-btn-hover ease">More</button>
+export default function Travel({ data, origin, destination, price, availability }) {
+    const destinationsImages = {
+        'BRC': "/places/BRC.jpg",
+        'COR': "/places/COR.jpg",
+        'MDZ': "/places/MDZ.jpg",
+        'EPA': "/places/EPA.jpg",
+    };
+
+    const places = {
+        'BRC': "Bariloche",
+        'COR': "Córdoba",
+        'MDZ': "Mendoza",
+        'EPA': "El Palomar",
+    };
+
+    const imgSrc = destinationsImages[destination] || "./assets/places/notFound.png";
+    const destinationName = places[destination] || "Unknown Location";
+    const originName = places[origin] || "Unknown Location";
+
+    return (
+        <div className="max-w-xs rounded-lg shadow-lg bg-white border border-[#dadada] flex flex-col overflow-hidden">
+            <div>
+            <p className="text-white font-semibold text-sm absolute p-1 bg-[#e3ddc7c9] rounded m-2">{data}</p>
+            <img
+                alt={destinationName}
+                src={imgSrc}
+                className="w-full h-40 object-cover"
+            />
+            </div>
+
+            <div className="p-4 flex flex-col gap-2">
+                <p className="font-bold text-2xl text-center">{destinationName}</p>
+                <div className="flex flex-col gap-1">
+                    <p className="text-gray-600"><span className="font-bold">Ida</span> desde {originName}</p>
+                    <p className="text-gray-700 text-sm"><b>Disponibilidad:</b> {availability}</p>
+                </div>
+                <div className="mt-3 flex justify-center">
+                    <span className="bg-[#fdbe15] text-white font-bold text-lg px-4 py-2 rounded shadow">
+                        USD$ {price}
+                    </span>
+                </div>
             </div>
         </div>
-    )
+    );
 }
