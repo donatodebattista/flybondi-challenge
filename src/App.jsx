@@ -58,7 +58,7 @@ function App() {
           </div>
 
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 max-w-6xl mx-auto pt-14 sm:pt-36 pb-14 px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 max-w-6xl mx-auto pt-14 sm:pt-36 pb-10 px-4">
             {currentTravels.map((travel, idx) => (
               <Travel key={idx} {...travel} />
             ))}
@@ -66,23 +66,23 @@ function App() {
 
 
           {/* Controles de paginación */}
-          <div className="flex justify-center gap-2 mt-10 items-center">
+          <div className="flex justify-center gap-2 sm:mt-10 items-center bg-neutral-800 w-fit mx-auto px-4 py-2 sm:py-4 sm:px-18 rounded">
             <button
-              disabled={page === 1 || totalPages === 0}
+              disabled = { (page === 1 || totalPages === 0) ? true : false }
               onClick={() => setPage((p) => p - 1)}
-              className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+              className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-default cursor-pointer bg-white text-sm sm:text-md"
             >
-              ⬅ Anterior
+              Anterior
             </button>
-            <span>
+            <span className='text-white font-semibold text-sm'>
               {totalPages === 0 ? 0 : page} de {totalPages}
             </span>
             <button
               disabled={page === totalPages || totalPages === 0}
               onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+              className="px-3 py-1 border rounded disabled:opacity-70 disabled:cursor-default cursor-pointer bg-white text-sm sm:text-md"
             >
-              Siguiente ➡
+              Siguiente
             </button>
           </div>
         </main>
