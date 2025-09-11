@@ -1,12 +1,15 @@
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
+import { Outlet } from 'react-router'
 
-export default function AppLayout({ children }) {
+export default function AppLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex-1 flex flex-col">{children}</div>
+      <main className="flex-1">
+        <Outlet />
+      </main>
       <Footer />
     </div>
-  )
+  );
 }
