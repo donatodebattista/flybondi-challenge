@@ -10,7 +10,6 @@ function App() {
   const travelsPerPage = 12;
 
 
-
   useEffect(() => {
     if (filterPrice === "" || isNaN(filterPrice)) {
       setFilteredTravels(dataset);
@@ -20,11 +19,11 @@ function App() {
       );
       setFilteredTravels(filtered);
     }
-    setPage(1); // 👈 Resetear a la primera página al filtrar
+    setPage(1); 
   }, [filterPrice]);
 
 
-  // --- Paginación ---
+  // Paginación
   const totalPages = Math.ceil(filteredTravels.length / travelsPerPage);
   const startIndex = (page - 1) * travelsPerPage;
   const endIndex = startIndex + travelsPerPage;
@@ -37,7 +36,6 @@ function App() {
   }, [totalPages, page]);
 
   return (
-      <AppLayout>
         <main className='flex-1 flex flex-col min-h-0'>
 
           {/* INPUT DE PRECIO */}
@@ -59,8 +57,8 @@ function App() {
 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 max-w-6xl mx-auto pt-14 sm:pt-36 pb-10 px-4">
-            {currentTravels.map((travel, idx) => (
-              <Travel key={idx} {...travel} />
+            {currentTravels.map((t) => (
+              <Travel key={t.id} travel={t}/>
             ))}
           </div>
 
@@ -86,7 +84,6 @@ function App() {
             </button>
           </div>
         </main>
-      </AppLayout>
   )
 }
 
