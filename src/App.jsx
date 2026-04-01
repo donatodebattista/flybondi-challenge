@@ -1,90 +1,138 @@
-import AppLayout from './layouts/AppLayout';
-import { useState, useEffect, use } from 'react';
-import dataset from './data/dataset.json'
-import Travel from './components/Travel';
+import React, { useState, useEffect, useMemo } from 'react';
+import dataset from './data/dataset.json';
+import FlightCard from './components/FlightCard';
+import FlightCardSkeleton from './components/FlightCardSkeleton';
+import FilterSidebar from './components/FilterSidebar';
+import EmptyState from './components/EmptyState';
+import { getMockedFlightDetails } from './lib/mock';
+import { PlaneTakeoff } from 'lucide-react';
 
 function App() {
-  const [filteredTravels, setFilteredTravels] = useState(dataset);
-  const [filterPrice, setFilterPrice] = useState('');
-  const [page, setPage] = useState(1);
-  const travelsPerPage = 12;
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [currentSort, setCurrentSort] = useState('recommended');
+  
+  // Pagination
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Derive flights with mock data once
+  const flightsWithMockData = useMemo(() => {
+    return dataset.map(flight => ({
+      ...flight,
+      _mocked: getMockedFlightDetails(flight.id, flight.origin, flight.destination)
+    }));
+  }, []);
 
-  useEffect(() => {
-    if (filterPrice === "" || isNaN(filterPrice)) {
-      setFilteredTravels(dataset);
-    } else {
-      const filtered = dataset.filter(
-        (travel) => travel.price <= parseFloat(filterPrice)
-      );
-      setFilteredTravels(filtered);
+  // Filter & Sort
+  const processedFlights = useMemo(() => {
+    let result = flightsWithMockData.filter(f => f.price <= maxPrice);
+
+    if (currentSort === 'cheapest') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (currentSort === 'fastest') {
+      result.sort((a, b) => a._mocked.durationMins - b._mocked.durationMins);
+    } else if (currentSort === 'recommended') {
+      result.sort((a, b) => a._mocked.recommendedScore - b._mocked.recommendedScore);
     }
-    setPage(1); 
-  }, [filterPrice]);
 
+    return result;
+  }, [flightsWithMockData, maxPrice, currentSort]);
 
-  // Paginación
-  const totalPages = Math.ceil(filteredTravels.length / travelsPerPage);
-  const startIndex = (page - 1) * travelsPerPage;
-  const endIndex = startIndex + travelsPerPage;
-  const currentTravels = filteredTravels.slice(startIndex, endIndex);
+  // Pagination logic
+  const currentFlights = processedFlights.slice(0, visibleCount);
+  const hasMore = visibleCount < processedFlights.length;
 
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount(prev => prev + 10);
+      setIsLoadingMore(false);
+    }, 800); // simulated network delay
+  };
+
+  // Reset pagination when filters OR sort change
   useEffect(() => {
-    if (totalPages > 0 && page > totalPages) {
-      setPage(1);
-    }
-  }, [totalPages, page]);
+    setVisibleCount(10);
+  }, [maxPrice, currentSort]);
+
+  const resetFilters = () => {
+    setMaxPrice(1000);
+    setCurrentSort('recommended');
+  };
 
   return (
-        <main className='flex-1 flex flex-col min-h-0'>
+    <main className="flex-1 flex flex-col min-h-0 bg-gray-50 w-full">
+      
+      {/* Search Header */}
+      <div className="bg-blue-600 w-full py-12 px-6">
+          <div className="max-w-7xl mx-auto text-center md:text-left flex flex-col md:flex-row items-center gap-4">
+              <div className="bg-blue-500/30 p-4 rounded-2xl">
+                  <PlaneTakeoff size={36} className="text-white" />
+              </div>
+              <div>
+                  <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Encuentra tu próximo vuelo</h1>
+                  <p className="text-blue-100 font-medium">Las mejores tarifas y conexiones para tu viaje.</p>
+              </div>
+          </div>
+      </div>
 
-          {/* INPUT DE PRECIO */}
-          <div className="price-input-container py-12 sm:py-20 bg-[url('/places/lake.jpg')] bg-cover bg-center">
-            
-            <div className='h-[160px] flex flex-col justify-center items-center mx-auto lg:w-1/2 lg:py-15 md:w-96 md:py-6 sm:w-96 sm:py-6 backdrop-blur-md sm:rounded-lg'>
-              
-              <h2 className='text-white font-semibold text-md sm:text-lg lg:text-xl mb-4'>Filtrar viajes</h2>
-                  <input
-                    type="number"
-                    placeholder="Precio Máximo"
-                    value={filterPrice}
-                    onChange={(e) => setFilterPrice(e.target.value)}
-                    className="lg:w-1/3 md:w-1/2 sm:w-1/2 h-6 rounded-sm p-1 text-black bg-white placeholder-gray-500 focus:outline-none focus:ring-2"
-                    min="0"
-                  />
-            </div>
+      <div className="max-w-[1400px] w-full mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-8">
+        
+        {/* Sidebar container */}
+        <div className="lg:w-[320px] shrink-0">
+          <FilterSidebar 
+            maxPrice={maxPrice} 
+            setMaxPrice={setMaxPrice} 
+            minAllowedPrice={100}
+            maxAllowedPrice={1000}
+            currentSort={currentSort}
+            setCurrentSort={setCurrentSort}
+          />
+        </div>
+        
+        {/* Results container */}
+        <div className="flex-1 flex flex-col gap-5 min-w-0">
+          {/* Header row with results count */}
+          <div className="flex items-center justify-between px-1">
+             <h2 className="text-lg font-bold text-gray-900">
+                {processedFlights.length} {processedFlights.length === 1 ? 'vuelo encontrado' : 'vuelos encontrados'}
+             </h2>
           </div>
 
+          {processedFlights.length === 0 ? (
+              <EmptyState resetFilters={resetFilters} />
+          ) : (
+              <>
+                <div className="flex flex-col gap-4">
+                  {currentFlights.map(flight => (
+                    <FlightCard key={flight.id} travel={flight} />
+                  ))}
+                </div>
+                
+                {isLoadingMore && (
+                  <div className="flex flex-col gap-4 mt-2">
+                      <FlightCardSkeleton />
+                      <FlightCardSkeleton />
+                  </div>
+                )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 max-w-6xl mx-auto pt-14 sm:pt-36 pb-10 px-4">
-            {currentTravels.map((t) => (
-              <Travel key={t.id} travel={t}/>
-            ))}
-          </div>
+                {hasMore && !isLoadingMore && (
+                  <div className="flex justify-center mt-6 mb-12">
+                    <button 
+                      onClick={handleLoadMore}
+                      className="bg-white border border-gray-200 text-blue-600 font-bold py-3 px-8 rounded-full shadow-sm hover:shadow-md hover:border-blue-300 hover:text-blue-700 hover:bg-blue-50 transition-all active:scale-95"
+                    >
+                        Cargar más vuelos
+                    </button>
+                  </div>
+                )}
+              </>
+          )}
+        </div>
 
-
-          {/* Controles de paginación */}
-          <div className="flex justify-center gap-2 sm:mt-10 items-center bg-neutral-800 w-fit mx-auto px-4 py-2 sm:py-4 sm:px-18 rounded">
-            <button
-              disabled = { (page === 1 || totalPages === 0) ? true : false }
-              onClick={() => setPage((p) => p - 1)}
-              className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-default cursor-pointer bg-white text-sm sm:text-md"
-            >
-              Anterior
-            </button>
-            <span className='text-white font-semibold text-sm'>
-              {totalPages === 0 ? 0 : page} de {totalPages}
-            </span>
-            <button
-              disabled={page === totalPages || totalPages === 0}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 border rounded disabled:opacity-70 disabled:cursor-default cursor-pointer bg-white text-sm sm:text-md"
-            >
-              Siguiente
-            </button>
-          </div>
-        </main>
-  )
+      </div>
+    </main>
+  );
 }
 
-export default App
+export default App;
